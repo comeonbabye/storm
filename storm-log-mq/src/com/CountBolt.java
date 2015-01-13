@@ -1,5 +1,6 @@
 package com;
 
+import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,14 +27,14 @@ public class CountBolt implements IRichBolt {
 
 	//db -> COUNT
 	private HashMap<String, Item> counter = new HashMap<String, Item>();
-	HashMap<String, Item> pendingToSave = new HashMap<String, Item>();
+	private HashMap<String, Item> pendingToSave = new HashMap<String, Item>();
 	
 	private OutputCollector collector;
 	
 	private DBUtil db;
 	
 	private Date today = new Date();
-	private String dateStr = DateUtil.dateToString(today, DateUtil.DATE_FORMAT_2);
+	private String dateStr = DateUtil.dateToString(today, DateUtil.DATE_FORMAT_5);
 	
 	private Timer timer;
 	
@@ -51,11 +52,15 @@ public class CountBolt implements IRichBolt {
 				}
 				
 				for (String key : pendings.keySet()) {
-					String[] keys = key.split(":");
-					String product = keys[0];
-					String categ = keys[1];
-					Integer count = pendings.get(key);
-					jedis.hset(buildRedisKey(product), categ, count.toString());
+
+					Item item = pendings.get(key);
+					if (item.getId() != null && item.getId() > 0) { // update
+						String sql = "update db_count set db_count=" + item.getDbCount() + " where db_key=" + item.getDbKey();
+						db.executeUpdate(sql);
+					} else {// save
+						String sql = "insert into db_count (db_key, db_name, db_date, db_count) values (?,?,?,?)";
+						db.executeUpdate2(sql, key, item.getDbName(), item.getDbDate(), item.getDbCount());
+					}
 				}
 			}
 		};
@@ -65,14 +70,61 @@ public class CountBolt implements IRichBolt {
 	
 	private synchronized void initDate() {
 		today = new Date();
-		dateStr = DateUtil.dateToString(today, DateUtil.DATE_FORMAT_2);
+		dateStr = DateUtil.dateToString(today, DateUtil.DATE_FORMAT_5);
 	}
 	
-	private int count(String dbName, String url) {
-		int count = getProductCategoryCount(categ, product);
-		count ++;
-		storeProductCategoryCount(categ, product, count);
-		return count;
+	private String buildKey(String dbName) {
+		return "dbName_" + dateStr;
+	}
+	
+	private Item getItem(String dbName) {
+		String key = buildKey(dbName);
+		Item item = counter.get(key);
+		if(item == null) {
+			ResultSet rs = db.executeQuery("select id, db_key, db_name, db_date, db_count from db_count where db_key=" + key, 1);
+			
+			item = new Item();
+			
+			try {
+				if(rs.next()) {
+					item.setId(rs.getLong("id"));
+					item.setDbKey(rs.getString("db_key"));
+					item.setDbDate(rs.getDate("db_date"));
+					item.setDbName(rs.getString("db_name"));
+					item.setDbCount(rs.getInt("db_count"));
+				} else {
+					item.setId(-1L);
+					item.setDbCount(0);
+					item.setDbKey(key);
+					item.setDbDate(today);
+					item.setDbName(dbName);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				item.setId(-1L);
+				item.setDbCount(0);
+				item.setDbKey(key);
+				item.setDbDate(today);
+				item.setDbName(dbName);
+			}
+		}
+		
+		return item;
+	}
+	
+	private void saveItem(String dbName, Item item) {
+		String key = buildKey(dbName);
+		counter.put(key , item);
+		synchronized (pendingToSave) {
+			pendingToSave.put(key, item);	
+		}
+	}
+	
+	private void count(String dbName, String url) {
+		Item item = getItem(dbName);
+		item.setDbCount(item.getDbCount() + 1);
+		
+		saveItem(dbName, item);
 	}
 	
 	
@@ -86,6 +138,7 @@ public class CountBolt implements IRichBolt {
 		
 		count((String)list.get(0), (String)list.get(1));
 		
+		collector.ack(input);
 	}
 	
 
@@ -99,7 +152,7 @@ public class CountBolt implements IRichBolt {
 				(String)stormConf.get(Constants.DB_NAME), 
 				(String)stormConf.get(Constants.DB_USER_NAME), 
 				(String)stormConf.get(Constants.DB_PASSWORD));
-		
+		startDownloaderThread();
 	}
 
 	@Override

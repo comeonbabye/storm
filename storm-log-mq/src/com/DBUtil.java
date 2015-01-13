@@ -2,6 +2,7 @@ package com;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,6 +11,7 @@ import java.sql.Statement;
 public class DBUtil {
 	public Connection conn = null;
 	public Statement stmt = null;
+	private PreparedStatement  ps = null;
 	public ResultSet rs = null;
 	private String dbClassName = "com.mysql.jdbc.Driver";
 	private String dbUrl = "jdbc:mysql://42.96.168.163:3306/illidan_one?user=dev&password=dev@yjxd.com&characterEncoding=utf-8&useUnicode=true";
@@ -81,6 +83,27 @@ public class DBUtil {
 			conn = getConnection(); //调用getConnection()方法构造Connection对象的一个实例conn
 			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE );
 			result = stmt.executeUpdate(sql); //执行更新操作
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+			result = 0;
+		}
+		return result;
+	}
+	
+	/*
+	 * 功能:执行更新操作
+	 */
+	public int executeUpdate2(String sql, Object ... objs) {
+		int result = 0;
+		try {
+			conn = getConnection(); //调用getConnection()方法构造Connection对象的一个实例conn
+			ps = conn.prepareStatement(sql);
+			int index = 1;
+			for(Object obj : objs) {
+				ps.setObject(index++, obj);
+			}
+			
+			result = ps.executeUpdate();
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 			result = 0;

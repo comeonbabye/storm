@@ -9,7 +9,7 @@ public class Item implements java.io.Serializable {
 	private String dbKey;
 	private String dbName;
 	private Date dbDate;
-	private Integer count;
+	private Integer dbCount;
 	public Long getId() {
 		return id;
 	}
@@ -34,10 +34,11 @@ public class Item implements java.io.Serializable {
 	public void setDbDate(Date dbDate) {
 		this.dbDate = dbDate;
 	}
-	public Integer getCount() {
-		return count;
+	public Integer getDbCount() {
+		return dbCount;
 	}
-	public void setCount(Integer count) {
-		this.count = count;
+	public void setDbCount(Integer dbCount) {
+		this.dbCount = dbCount;
 	}
+ 
 }
