@@ -21,8 +21,12 @@ public class TopologyProductClushterStarter {
 			Config conf = new Config();
 			conf.put("message", "hi, this is a test");
 			conf.put("file.path", args[1]);
-			
+			conf.setDebug(true);
+			/*conf.setNumWorkers(3);
+	        conf.setMaxSpoutPending(5000);*/
 			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+			
+			System.out.println("提交任务["+ args[0] + "]结束");
 			
 		} catch (Exception e) {
 			e.printStackTrace();

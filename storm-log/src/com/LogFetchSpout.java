@@ -27,11 +27,43 @@ public class LogFetchSpout extends BaseRichSpout {
 	
 	private SpoutOutputCollector collector;
 	
-	@SuppressWarnings("unchecked")
-	private Map conf;
+	private BufferedReader br;
+	
+	private boolean complete = false;
 	
 	@Override
 	public void nextTuple() {
+		
+		try {
+			
+			if(complete) {
+				Thread.sleep(50); //睡眠1毫秒，降低处理器的负载
+				return;
+			}
+			
+			if(br != null) {
+				String line = null;
+				while((line = br.readLine()) != null) {
+					collector.emit(new Values(count.getAndIncrement(), line));
+				}
+			}
+			
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			complete = true;
+		}
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
+	
+		System.out.println("打印日志信息>>>>>>>>>>>>>\n" + conf);
+		this.collector = collector;
 		
 		try {
 			File file = null;
@@ -48,25 +80,12 @@ public class LogFetchSpout extends BaseRichSpout {
 				return;
 			}
 			
-			BufferedReader br = new BufferedReader(new FileReader(file));
-			String line = null;
-			while((line = br.readLine()) != null) {
-				collector.emit(new Values(count.getAndIncrement(), line));
-			}
-			
+			br = new BufferedReader(new FileReader(file));
+			 
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println("打开文件是吧>>>>>>>>>>>>>\n" + conf);
 		}
-		
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-	
-		System.out.println("打印日志信息>>>>>>>>>>>>>\n" + conf);
-		this.conf = conf;
-		this.collector = collector;
 	}
 
 	@Override
@@ -77,6 +96,34 @@ public class LogFetchSpout extends BaseRichSpout {
 		 */
 		declarer.declare(new Fields("id", "info"));
 
+	}
+
+	@Override
+	public void ack(Object msgId) {
+		super.ack(msgId);
+		System.out.println("成功处理消息:[" + msgId + "]");
+	}
+
+	@Override
+	public void fail(Object msgId) {
+		super.fail(msgId);
+		System.out.println("失败处理消息:[" + msgId + "]");
+	}
+
+	@Override
+	public void close() {
+		
+		super.close();
+		
+		if(br != null) {
+			try {
+				br.close();
+				br = null;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 
 }

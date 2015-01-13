@@ -23,8 +23,11 @@ public class TopologyLocalClushterStarter {
 		
 		
 		Config conf = new Config();
+		//conf.setDebug(false);
+		//conf.setNumWorkers(1);
+        //conf.setMaxSpoutPending(5000);
 		conf.put("message", "hi, this is a test");
-		conf.put("file.path", "F:\\data\\ec2\\logs\\dianshang.log");
+		conf.put("file.path", "F:\\data\\ec2\\logs\\voldemort_news.log");
 		
 		LocalCluster cluster = new LocalCluster();
 		cluster.submitTopology("test", conf, builder.createTopology());
