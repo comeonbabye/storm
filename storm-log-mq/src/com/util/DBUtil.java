@@ -1,4 +1,4 @@
-package com;
+package com.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -50,13 +50,13 @@ public class DBUtil {
 		}
 
 		if (conn == null) {
-			System.err.println("警告: DbConnectionManager.getConnection() 获得数据库链接失败.\r\n\r\n链接类型:" + dbClassName + "\r\n链接位置:" + dbUrl);
+			System.err.println("警告: DbConnectionManager.getConnection() 获得数据库链接失�?.\r\n\r\n链接类型:" + dbClassName + "\r\n链接位置:" + dbUrl);
 		}
 		return conn;
 	}
 
 	/*
-	 * 功能：执行查询语句
+	 * 功能：执行查询语�?
 	 */
 	public ResultSet executeQuery(String sql, int maxCount) {
 		try {
@@ -80,7 +80,7 @@ public class DBUtil {
 	public int executeUpdate(String sql) {
 		int result = 0;
 		try {
-			conn = getConnection(); //调用getConnection()方法构造Connection对象的一个实例conn
+			conn = getConnection(); //调用getConnection()方法构�?�Connection对象的一个实例conn
 			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE );
 			result = stmt.executeUpdate(sql); //执行更新操作
 		} catch (SQLException ex) {
@@ -96,7 +96,7 @@ public class DBUtil {
 	public int executeUpdate2(String sql, Object ... objs) {
 		int result = 0;
 		try {
-			conn = getConnection(); //调用getConnection()方法构造Connection对象的一个实例conn
+			conn = getConnection(); //调用getConnection()方法构�?�Connection对象的一个实例conn
 			ps = conn.prepareStatement(sql);
 			int index = 1;
 			for(Object obj : objs) {

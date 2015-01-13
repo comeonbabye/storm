@@ -1,4 +1,4 @@
-package com;
+package com.entitiy;
 
 import java.util.Date;
 
