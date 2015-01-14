@@ -1,5 +1,7 @@
 package com;
 
+import com.util.Constants;
+
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.topology.TopologyBuilder;
@@ -19,18 +21,22 @@ public class TopologyLocalClushterStarter {
 		TopologyBuilder builder = new TopologyBuilder();
 		
 		builder.setSpout("read-log", new LogFetchSpout(), 1);
-		builder.setBolt("out-log", new CountBolt(), 1).shuffleGrouping("read-log");
+		builder.setBolt("count-log", new CountBolt(), 1).shuffleGrouping("read-log");
 		
 		
 		Config conf = new Config();
 		//conf.setDebug(false);
 		//conf.setNumWorkers(1);
         //conf.setMaxSpoutPending(5000);
-		conf.put("message", "hi, this is a test");
-		conf.put("file.path", "F:\\data\\ec2\\logs\\voldemort_news.log");
+		conf.put(Constants.DB_HOST, "42.96.168.163");
+		conf.put(Constants.DB_PORT, "3306");
+		conf.put(Constants.DB_NAME, "illidan_one");
+		conf.put(Constants.DB_USER_NAME, "root");
+		conf.put(Constants.DB_PASSWORD, "123456");
+		
 		
 		LocalCluster cluster = new LocalCluster();
-		cluster.submitTopology("test", conf, builder.createTopology());
+		cluster.submitTopology("log", conf, builder.createTopology());
 		
 	}
 

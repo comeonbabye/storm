@@ -1,8 +1,5 @@
 package com;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -12,6 +9,10 @@ import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+
+import com.queue.LogItem;
+import com.queue.MessageQueue;
+import com.queue.MessageQueueFactory;
 
 /**
  * 
@@ -27,34 +28,26 @@ public class LogFetchSpout extends BaseRichSpout {
 	
 	private SpoutOutputCollector collector;
 	
-	private BufferedReader br;
+	private MessageQueue<LogItem> messageQueue;
 	
-	private boolean complete = false;
 	
 	@Override
 	public void nextTuple() {
 		
 		try {
 			
-			if(complete) {
-				Thread.sleep(50); //睡眠1毫秒，降低处理器的负载
-				return;
+			LogItem item = messageQueue.take(1000L);
+			
+			if(item != null) {
+				
+				System.out.println(item);
+				
+				collector.emit(new Values(item.getDbName(), item.getUrl()), count.getAndIncrement());
 			}
 			
-			if(br != null) {
-				String line = null;
-				while((line = br.readLine()) != null) {
-					collector.emit(new Values(count.getAndIncrement(), line));
-				}
-			}
-			
-			
-			
-		} catch (Exception e) {
+		} catch (InterruptedException e) {
 			e.printStackTrace();
-		} finally {
-			complete = true;
-		}
+		} 
 		
 	}
 
@@ -62,30 +55,10 @@ public class LogFetchSpout extends BaseRichSpout {
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 	
-		System.out.println("打印日志信息>>>>>>>>>>>>>\n" + conf);
+		System.out.println(">>>>>>>>>>>>>\n" + conf);
 		this.collector = collector;
-		
-		try {
-			File file = null;
-			
-			if(conf.containsKey("file.path") && conf.get("file.path") != null && !"".equalsIgnoreCase(conf.get("file.path").toString().trim())) {
-				file = new File((String)conf.get("file.path"));
-			} else {
-				file = new File("/opt/illidan-realtime/logs/illidan.log");
-			}
-			
-			if(!file.exists()) {
-				
-				System.out.println("文件不存在！直接返回，不做任何处理");
-				return;
-			}
-			
-			br = new BufferedReader(new FileReader(file));
-			 
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("打开文件是吧>>>>>>>>>>>>>\n" + conf);
-		}
+		MessageQueueFactory factory = new MessageQueueFactory();
+		messageQueue = factory.createConsumerMessageQueue();
 	}
 
 	@Override
@@ -94,7 +67,7 @@ public class LogFetchSpout extends BaseRichSpout {
 		 * 检查Spout和Bolt代码中的declareOutputFields方法
 		 * declare的Field数量 等于 collector.emit数量
 		 */
-		declarer.declare(new Fields("id", "info"));
+		declarer.declare(new Fields("dbName", "url"));
 
 	}
 
@@ -113,16 +86,7 @@ public class LogFetchSpout extends BaseRichSpout {
 	@Override
 	public void close() {
 		
-		super.close();
-		
-		if(br != null) {
-			try {
-				br.close();
-				br = null;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		messageQueue.close();
 		
 	}
 

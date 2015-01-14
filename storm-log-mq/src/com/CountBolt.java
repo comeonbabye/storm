@@ -1,6 +1,5 @@
 package com;
 
-import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -8,17 +7,18 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.entitiy.Item;
-import com.util.Constants;
-import com.util.DBUtil;
-import com.util.DateUtil;
-
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
+
+import com.entitiy.Item;
+import com.repository.DateUtil;
+import com.repository.ItemRepository;
+import com.util.Constants;
+import com.util.DBUtil;
 
 /**
  * 
@@ -36,7 +36,7 @@ public class CountBolt implements IRichBolt {
 	
 	private OutputCollector collector;
 	
-	private DBUtil db;
+	private ItemRepository itemRepository;
 	
 	private Date today = new Date();
 	private String dateStr = DateUtil.dateToString(today, DateUtil.DATE_FORMAT_5);
@@ -59,12 +59,20 @@ public class CountBolt implements IRichBolt {
 				for (String key : pendings.keySet()) {
 
 					Item item = pendings.get(key);
+					
 					if (item.getId() != null && item.getId() > 0) { // update
-						String sql = "update db_count set db_count=" + item.getDbCount() + " where db_key=" + item.getDbKey();
-						db.executeUpdate(sql);
+						String sql = "update db_count set db_count=?, update_time=? where db_key=?";
+						itemRepository.saveOrUpdate(sql, item.getDbCount(), new Date(), item.getDbKey());
+					} else if(isExsitsItem(item)) {
+						String sql = "update db_count set db_count=?, update_time=? where db_key=?";
+						itemRepository.saveOrUpdate(sql, item.getDbCount(), new Date(), item.getDbKey());
+						Long id = getItemId(item);
+						item.setId(id);
 					} else {// save
-						String sql = "insert into db_count (db_key, db_name, db_date, db_count) values (?,?,?,?)";
-						db.executeUpdate2(sql, key, item.getDbName(), item.getDbDate(), item.getDbCount());
+						String sql = "insert into db_count (db_key, db_name, db_date, db_count, update_time) values (?,?,?,?,?)";
+						itemRepository.saveOrUpdate(sql, key, item.getDbName(), item.getDbDate(), item.getDbCount(), new Date());
+						Long id = getItemId(item);
+						item.setId(id);
 					}
 				}
 			}
@@ -79,39 +87,51 @@ public class CountBolt implements IRichBolt {
 	}
 	
 	private String buildKey(String dbName) {
-		return "dbName_" + dateStr;
+		return dbName + "_" + dateStr;
+	}
+	
+	private Long getItemId(Item item) {
+		return getItemId(item.getDbName());
+	}
+	
+	private Long getItemId(String dbName) {
+		
+		long id = -1;
+		
+		if(dbName == null) return id;
+		
+		String key = buildKey(dbName);
+		Item item = counter.get(key);
+		if(item != null && item.getId() != null && item.getId() > 0) {
+			return item.getId();
+		} else {
+			 return itemRepository.getItemId(key);
+		}
+	}
+	
+	private boolean isExsitsItem(Item item) {
+		return isExsitsItem(item.getDbName());
+	}
+	
+	private boolean isExsitsItem(String dbName) {
+		
+		if(dbName == null) return false;
+		
+		String key = buildKey(dbName);
+		Item item = counter.get(key);
+		if(item != null && item.getId() != null && item.getId() > 0) {
+			return true;
+		} else {
+			return itemRepository.isExsitsItem(key);
+		}
+		
 	}
 	
 	private Item getItem(String dbName) {
 		String key = buildKey(dbName);
 		Item item = counter.get(key);
 		if(item == null) {
-			ResultSet rs = db.executeQuery("select id, db_key, db_name, db_date, db_count from db_count where db_key=" + key, 1);
-			
-			item = new Item();
-			
-			try {
-				if(rs.next()) {
-					item.setId(rs.getLong("id"));
-					item.setDbKey(rs.getString("db_key"));
-					item.setDbDate(rs.getDate("db_date"));
-					item.setDbName(rs.getString("db_name"));
-					item.setDbCount(rs.getInt("db_count"));
-				} else {
-					item.setId(-1L);
-					item.setDbCount(0);
-					item.setDbKey(key);
-					item.setDbDate(today);
-					item.setDbName(dbName);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				item.setId(-1L);
-				item.setDbCount(0);
-				item.setDbKey(key);
-				item.setDbDate(today);
-				item.setDbName(dbName);
-			}
+			item = itemRepository.getItem(dbName, key, today);
 		}
 		
 		return item;
@@ -152,11 +172,13 @@ public class CountBolt implements IRichBolt {
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		
 		this.collector = collector;
-		db = new DBUtil((String)stormConf.get(Constants.DB_HOST), 
+		DBUtil db = new DBUtil((String)stormConf.get(Constants.DB_HOST), 
 				(String)stormConf.get(Constants.DB_PORT), 
 				(String)stormConf.get(Constants.DB_NAME), 
 				(String)stormConf.get(Constants.DB_USER_NAME), 
 				(String)stormConf.get(Constants.DB_PASSWORD));
+		
+		itemRepository = new ItemRepository(db);
 		startDownloaderThread();
 	}
 

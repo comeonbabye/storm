@@ -50,5 +50,9 @@
 	<classpathentry kind="lib" path="lib/tools.logging-0.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/tools.macro-0.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.3.3.jar"/>
+	<classpathentry kind="lib" path="lib-extend/activemq-core-5.1.0.jar"/>
+	<classpathentry kind="lib" path="lib-extend/mysql-connector-java-5.1.6.jar"/>
+	<classpathentry kind="lib" path="lib-extend/geronimo-jms_1.1_spec-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib-extend/geronimo-j2ee-management_1.0_spec-1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -1,5 +1,5 @@
 
-package com.util;
+package com.repository;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -139,6 +139,6 @@ public class DateUtil {
     public static final String DATE_FORMAT_1 = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_FORMAT_2 = "yyyy-MM-dd";
     public static final String DATE_FORMAT_3 = "yyyyMMddhhmmss";
-    public static final String DATE_FORMAT_4 = "yyyy年MM月dd�?";
+    public static final String DATE_FORMAT_4 = "yyyy年MM月dd�?";
     public static final String DATE_FORMAT_5 = "yyyyMMdd";
 }

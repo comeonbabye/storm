@@ -14,7 +14,7 @@ public class DBUtil {
 	private PreparedStatement  ps = null;
 	public ResultSet rs = null;
 	private String dbClassName = "com.mysql.jdbc.Driver";
-	private String dbUrl = "jdbc:mysql://42.96.168.163:3306/illidan_one?user=dev&password=dev@yjxd.com&characterEncoding=utf-8&useUnicode=true";
+	private String dbUrl = "jdbc:mysql://42.96.168.163:3306/illidan_one?user=root&password=123456&characterEncoding=utf-8&useUnicode=true";
 
 	
 	public DBUtil() {
@@ -50,13 +50,13 @@ public class DBUtil {
 		}
 
 		if (conn == null) {
-			System.err.println("警告: DbConnectionManager.getConnection() 获得数据库链接失�?.\r\n\r\n链接类型:" + dbClassName + "\r\n链接位置:" + dbUrl);
+			System.err.println("警告: DbConnectionManager.getConnection() 获得数据库链接失?.\r\n\r\n链接类型:" + dbClassName + "\r\n链接位置:" + dbUrl);
 		}
 		return conn;
 	}
 
 	/*
-	 * 功能：执行查询语�?
+	 * 功能：执行查询语 
 	 */
 	public ResultSet executeQuery(String sql, int maxCount) {
 		try {
@@ -69,6 +69,7 @@ public class DBUtil {
 
 			rs = stmt.executeQuery(sql);
 		} catch (SQLException ex) {
+			ex.printStackTrace();
 			System.err.println(ex.getMessage());
 		}
 		return rs;
@@ -80,7 +81,7 @@ public class DBUtil {
 	public int executeUpdate(String sql) {
 		int result = 0;
 		try {
-			conn = getConnection(); //调用getConnection()方法构�?�Connection对象的一个实例conn
+			conn = getConnection();  
 			stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE );
 			result = stmt.executeUpdate(sql); //执行更新操作
 		} catch (SQLException ex) {
@@ -96,7 +97,7 @@ public class DBUtil {
 	public int executeUpdate2(String sql, Object ... objs) {
 		int result = 0;
 		try {
-			conn = getConnection(); //调用getConnection()方法构�?�Connection对象的一个实例conn
+			conn = getConnection();  
 			ps = conn.prepareStatement(sql);
 			int index = 1;
 			for(Object obj : objs) {
