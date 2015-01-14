@@ -10,9 +10,9 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
-import com.queue.LogItem;
-import com.queue.MessageQueue;
-import com.queue.MessageQueueFactory;
+import com.storm.queue.LogItem;
+import com.storm.queue.MessageQueue;
+import com.storm.queue.MessageQueueFactory;
 
 /**
  * 

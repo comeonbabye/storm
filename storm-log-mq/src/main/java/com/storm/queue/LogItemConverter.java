@@ -1,4 +1,4 @@
-package com.queue;
+package com.storm.queue;
 
 import javax.jms.JMSException;
 import javax.jms.Message;

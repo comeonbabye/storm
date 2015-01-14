@@ -1,8 +1,8 @@
-package com.test;
+package com.storm.test;
 
-import com.queue.LogItem;
-import com.queue.MessageQueue;
-import com.queue.MessageQueueFactory;
+import com.storm.queue.LogItem;
+import com.storm.queue.MessageQueue;
+import com.storm.queue.MessageQueueFactory;
 
 public class SendMessageTest {
 

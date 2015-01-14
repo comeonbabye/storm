@@ -1,10 +1,10 @@
-package com.repository;
+package com.storm.repository;
 
 import java.sql.ResultSet;
 import java.util.Date;
 
-import com.entitiy.Item;
-import com.util.DBUtil;
+import com.storm.entitiy.Item;
+import com.storm.util.DBUtil;
 
 public class ItemRepository {
 

@@ -1,4 +1,4 @@
-package com.entitiy;
+package com.storm.entitiy;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package com.queue;
+package com.storm.queue;
 
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;

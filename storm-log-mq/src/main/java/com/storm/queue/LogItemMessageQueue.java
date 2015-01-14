@@ -1,6 +1,6 @@
-package com.queue;
+package com.storm.queue;
 
-import com.queue.JmsQueue.QueueRole;
+import com.storm.queue.JmsQueue.QueueRole;
 
 
 public class LogItemMessageQueue implements MessageQueue<LogItem> {

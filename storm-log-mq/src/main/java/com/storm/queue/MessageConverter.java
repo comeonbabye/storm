@@ -6,7 +6,7 @@
  * User: EUCITA-wangtao <br>
  */
 
-package com.queue;
+package com.storm.queue;
 
 import javax.jms.Message;
 import javax.jms.Session;

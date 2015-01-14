@@ -1,4 +1,4 @@
-package com.util;
+package com.storm.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

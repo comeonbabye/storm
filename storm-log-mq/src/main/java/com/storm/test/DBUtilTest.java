@@ -1,8 +1,8 @@
-package com.test;
+package com.storm.test;
 
 import java.sql.ResultSet;
 
-import com.util.DBUtil;
+import com.storm.util.DBUtil;
 
 public class DBUtilTest {
 

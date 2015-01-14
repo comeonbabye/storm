@@ -1,6 +1,6 @@
 package com;
 
-import com.util.Constants;
+import com.storm.util.Constants;
 
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;

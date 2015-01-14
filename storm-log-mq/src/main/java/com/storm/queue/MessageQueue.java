@@ -1,4 +1,4 @@
-package com.queue;
+package com.storm.queue;
 
 public interface MessageQueue<E> {
 
