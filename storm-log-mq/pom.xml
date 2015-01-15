@@ -31,14 +31,36 @@
 		  <snapshots><enabled>true</enabled></snapshots>
 		</repository>
 
+		<!--  这个仓库有时候有问题，下载不下来jar包
 		<repository>
 			<id>github-releases</id>
 			<url>http://oss.sonatype.org/content/repositories/github-releases/</url>
 		</repository>
+		-->
 
 		<repository>
 			<id>clojars.org</id>
 			<url>http://clojars.org/repo</url>
+		</repository>
+		
+		<repository>
+			<id>mirrors.ibiblio</id>
+			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2/org/acegisecurity/</url>
+		</repository>
+		
+		<repository>
+			<id>people.snapshot</id>
+			<url>http://people.apache.org/repo/m2-snapshot-repository</url>
+		</repository>
+		
+		<repository>
+			<id>people.incubating</id>
+			<url>http://people.apache.org/repo/m2-incubating-repository/</url>
+		</repository>
+		
+		<repository>
+			<id>repository.sonatype</id>
+			<url>http://repository.sonatype.org/content/groups/public/</url>
 		</repository>
 	</repositories>
 	
@@ -52,7 +74,7 @@
 		<dependency>
 			<groupId>storm</groupId>
 			<artifactId>storm</artifactId>
-			<version>0.7.1</version>
+			<version>0.8.1</version>
 		</dependency>
 		
 		<dependency>

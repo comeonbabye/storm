@@ -4,7 +4,6 @@ import java.sql.ResultSet;
 import java.util.Date;
 
 import com.storm.entitiy.Item;
-import com.storm.util.DBUtil;
 
 public class ItemRepository {
 

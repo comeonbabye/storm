@@ -1,5 +1,5 @@
 
-package com.storm.repository;
+package com.storm.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

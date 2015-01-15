@@ -30,6 +30,7 @@ public class LogFetchSpout extends BaseRichSpout {
 	
 	private MessageQueue<LogItem> messageQueue;
 	
+	private long start = System.currentTimeMillis();
 	
 	@Override
 	public void nextTuple() {
@@ -41,7 +42,6 @@ public class LogFetchSpout extends BaseRichSpout {
 			if(item != null) {
 				
 				System.out.println(item);
-				
 				collector.emit(new Values(item.getDbName(), item.getUrl()), count.getAndIncrement());
 			}
 			
@@ -75,6 +75,9 @@ public class LogFetchSpout extends BaseRichSpout {
 	public void ack(Object msgId) {
 		super.ack(msgId);
 		System.out.println("成功处理消息:[" + msgId + "]");
+		
+		
+		
 	}
 
 	@Override
